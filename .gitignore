@@ -1,3 +1,4 @@
-build/
+build/target/
+build/build_number
 *.exe
 *.rom
