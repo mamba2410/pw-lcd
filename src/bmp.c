@@ -63,7 +63,7 @@ int convert_8bpp_to_pw(uint8_t *data, uint8_t *pw, size_t data_size, size_t widt
     memset(pw, 0, pw_size);
 
     for(size_t i = 0; i < data_size; i++) {
-        size_t row = height-i/width;    // bmp (usually) starts bottom-left
+        size_t row = height-i/width-1;    // bmp (usually) starts bottom-left
         size_t col = i%width;
         uint8_t bitpos = row%8;
         uint8_t bitrow = row/8;
