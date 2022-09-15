@@ -78,7 +78,7 @@ int main(int argc, char** argv){
     int err = 0;
 
     if(fout != 0) {
-        err = convert_image(fin, fout, width, height);
+        err = convert_image(fin, fout, &width, &height);
         if(err) {
             printf("Error converting image \"%s\" to \"%s\".\n", fin, fout);
             return EXIT_FAILURE;
@@ -113,17 +113,17 @@ Usage: pw-lcd -i <input> [-o <output] [-v]\n\
 
 }
 
-int convert_image(const char *fin, const char *fout, int width, int height) {
+int convert_image(const char *fin, const char *fout, int *width, int *height) {
 
     uint8_t *bmp_img = malloc(2304);
     uint8_t *pw_img = malloc(2304/4);
-    size_t bmp_size = bmp_to_bytes(fin, bmp_img, &width, &height);
+    size_t bmp_size = bmp_to_bytes(fin, bmp_img, width, height);
 
     if(bmp_size == 0) {
         return -1;
     }
 
-    int err = convert_8bpp_to_pw(bmp_img, pw_img, bmp_size, width, height);
+    int err = convert_8bpp_to_pw(bmp_img, pw_img, bmp_size, *width, *height);
 
     if(err) {
         return -1;
@@ -149,6 +149,8 @@ int view_image(const char* fname, int width, int height) {
     if(width <= 0) width = DEFAULT_LCD_WIDTH;
     if(height <= 0) height = DEFAULT_LCD_HEIGHT;
 
+    int err = 0;
+
 	// New LCD instance
 	pw_lcd_t lcd;
 	lcd_init(&lcd, (size_t)width, (size_t)height);
@@ -165,8 +167,11 @@ int view_image(const char* fname, int width, int height) {
 
 	// Open file as lcd ram contents
 	//const char *fname = "test_image.bin";
-	lcd_read_file(&lcd, fname);
-    //memcpy(lcd.memory, pokeball_bin, pokeball_bin_len);
+	err = lcd_read_file(&lcd, fname);
+    if(err) {
+        printf("Error reading Pokewalker image\n");
+        return -1;
+    }
 
 	// Convert ram contents to 'pixel values'
 	lcd_decode_ram(lcd, term_buf);

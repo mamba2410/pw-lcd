@@ -10,7 +10,7 @@
 
 void decode_ram(uint8_t *lcd_ram, char **term_buf);
 void display(char **term_buf, size_t size, size_t width, size_t height);
-int convert_image(const char *fin, const char *fout, int width, int height);
+int convert_image(const char *fin, const char *fout, int *width, int *height);
 int view_image(const char* fname, int width, int height);
 void usage();
 
