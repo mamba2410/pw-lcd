@@ -14,7 +14,7 @@ void lcd_init(pw_lcd_t *lcd) {
 	if(lcd->memory == NULL) {
 		lcd->memory = malloc(LCD_RAM_LENGTH);
 	}
-	
+
 }
 
 
@@ -32,6 +32,7 @@ int lcd_read_file(pw_lcd_t *lcd, const char* fname) {
 	struct stat s;
 	if( stat(fname, &s) == -1 ) return -1;
 	fread(lcd->memory, s.st_size, 1, fh);
+    //printf("%d\n", s.st_size);
 	fclose(fh);
 
 	return 0;
@@ -71,11 +72,36 @@ void lcd_decode_ram(pw_lcd_t lcd, char **term_buf) {
 				case 3: tchar = '#'; break;
 				default: printf("Invalid value: %u\n", pixel_value[j]);
 			}
-		
+
 			// div by 2 since 2 bytes make one set of row characters
 			term_buf[i/2][j] = tchar;
 		}
 	}
+}
+
+void lcd_pw_to_bitmap(pw_lcd_t lcd, uint8_t *data, size_t width, size_t height) {
+
+    uint8_t *ram = lcd.memory;
+    uint8_t pu, pl, pval;
+    size_t pcol, prow, pidx;
+
+    for(size_t i = 0; i < LCD_RAM_LENGTH; i+=2) {
+        pu = ram[i];
+        pl = ram[i+1];
+
+        for(size_t j = 0; j < PIXELS_PER_ROW; j++) {
+            pval  = ((pu>>j)&1) << 1;
+            pval |= ((pl>>j)&1);
+
+            pcol = (i/2)%width;
+            prow = i/(2*width) * PIXELS_PER_ROW + j;
+            pidx = prow*width + pcol;
+
+            data[pidx] = pval;
+        }
+
+    }
+
 }
 
 

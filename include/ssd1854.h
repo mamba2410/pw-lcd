@@ -9,7 +9,7 @@
 
 
 #define LCD_WIDTH	96
-#define LCD_HEIGHT	64
+#define LCD_HEIGHT	48
 #define BIT_DEPTH	2
 #define PIXELS_PER_ROW	8
 #define LCD_RAM_LENGTH	LCD_WIDTH*LCD_HEIGHT*BIT_DEPTH/8
