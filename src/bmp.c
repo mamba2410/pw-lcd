@@ -5,7 +5,7 @@
 #include <string.h>
 #include "bmp.h"
 
-int bmp_to_bytes(char* fname, uint8_t *bytes) {
+int bmp_to_bytes(const char* fname, uint8_t *bytes) {
 	FILE* fh = fopen(fname, "rb");
     if( fh == NULL) {
         printf("Error opening file\n");

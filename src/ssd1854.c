@@ -10,11 +10,7 @@
 void lcd_init(pw_lcd_t *lcd) {
 	lcd->status = 0x0B; // Magic value in datasheet
 	lcd->status |= LCD_RESET_BIT;
-
-	if(lcd->memory == NULL) {
-		lcd->memory = malloc(LCD_RAM_LENGTH);
-	}
-
+	lcd->memory = malloc(LCD_RAM_LENGTH);
 }
 
 

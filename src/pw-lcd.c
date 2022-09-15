@@ -11,8 +11,8 @@
 
 void decode_ram(uint8_t *lcd_ram, char **term_buf);
 void display(char **term_buf);
-int convert_image(char *fin, char *fout);
-int view_image(char* fname);
+int convert_image(const char *fin, const char *fout);
+int view_image(const char* fname);
 
 
 	/*
@@ -35,14 +35,17 @@ int view_image(char* fname);
 	 */
 int main(int argc, char** argv){
 
-    //convert_image("./sad-pokewalker.bmp", "./test_image.bin");
-    view_image("./test_image.bin");
+    const char* bmp = "./sad-pokewalker.bmp";
+    const char* bin = "./test_image.bin";
+
+    convert_image(bmp, bin);
+    view_image(bin);
 
     return 0;
 
 }
 
-int convert_image(char *fin, char *fout) {
+int convert_image(const char *fin, const char *fout) {
 
     uint8_t *bmp_img = malloc(2304);
     uint8_t *pw_img = malloc(2304/4);
@@ -65,7 +68,7 @@ int convert_image(char *fin, char *fout) {
 
 }
 
-int view_image(char* fname) {
+int view_image(const char* fname) {
 
 	// New LCD instance
 	pw_lcd_t lcd;
