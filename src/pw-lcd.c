@@ -6,6 +6,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <ctype.h>
 
 #define TERMBUF_LENGTH	LCD_WIDTH*LCD_HEIGHT/PIXELS_PER_ROW
 
@@ -13,6 +16,7 @@ void decode_ram(uint8_t *lcd_ram, char **term_buf);
 void display(char **term_buf);
 int convert_image(const char *fin, const char *fout);
 int view_image(const char* fname);
+void usage();
 
 
 	/*
@@ -35,13 +39,75 @@ int view_image(const char* fname);
 	 */
 int main(int argc, char** argv){
 
-    const char* bmp = "./sad-pokewalker.bmp";
-    const char* bin = "./test_image.bin";
+    const char* fin = 0;
+    const char* fout = 0;
+    const char* fview = 0;
+    bool bview_image = false;
 
-    convert_image(bmp, bin);
-    view_image(bin);
+    int c;
+    const char* options = "i:o:vh";
+
+    while((c = getopt(argc, argv, options)) != -1) {
+        switch(c) {
+            case 'i':
+                fin = optarg;
+                break;
+            case 'o':
+                fout = optarg;
+                break;
+            case 'v':
+                bview_image = true;
+                break;
+            case 'h':
+                usage();
+                return 0;
+            case '?':
+                printf("Unknown option character \'%s\'\n", optopt);
+                usage();
+            default: return EXIT_FAILURE;
+        }
+    }
+
+    if(fin == 0) {
+        printf("Error: Need input file\n");
+        usage();
+        return EXIT_FAILURE;
+    }
+
+    int err = 0;
+
+    if(fout != 0) {
+        err = convert_image(fin, fout);
+        if(err) {
+            printf("Error converting image \"%s\" to \"%s\".\n", fin, fout);
+            return EXIT_FAILURE;
+        }
+    }
+
+
+    if(bview_image) {
+        fview = (fout == 0)?fin:fout;
+        err = view_image(fview);
+
+        if(err) {
+            printf("Error viewing image \"%s\"\n", fview);
+            return EXIT_FAILURE;
+        }
+
+    }
 
     return 0;
+
+}
+
+void usage() {
+    printf("\
+Usage: pw-lcd -i <input> [-o <output] [-v]\n\
+    -i <input>  Input file.\n\
+    -o <output> Output file\n\
+    -v          View image\n\
+    -h          Print this help\n\
+");
 
 }
 

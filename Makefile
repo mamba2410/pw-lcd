@@ -17,7 +17,7 @@ include ./build/build_number.mak	# build number tracking
 # Main recipe
 ###########################################################################################################
 
-MAIN_BIN 		= a.exe
+MAIN_BIN 		= pw-lcd
 MAIN_CC_FLAGS	= $(GLOBAL_CC_FLAGS)
 MAIN_LD_FLAGS	= $(GLOBAL_LD_FLAGS) -L'$(LIB_D)' -Wl,-rpath='$(LIB_D)'
 MAIN_SRC_D		= ./src
@@ -32,7 +32,7 @@ $(MAIN_OBJ_D):
 	@mkdir -p $@
 
 $(MAIN_OBJ_D)/%_c.o:	$(MAIN_SRC_D)/%.c
-	$(CC) $(MAIN_CC_FLAGS) -I'$(MAIN_INC_D)' -c $< -o $@ 
+	$(CC) $(MAIN_CC_FLAGS) -I'$(MAIN_INC_D)' -c $< -o $@
 
 main: $(MAIN_OBJ_D) $(MAIN_C_OBJ) $(MAIN_INC) # Add any libraries here
 	$(LD) $(MAIN_C_OBJ) $(MAIN_LD_FLAGS) -o $(MAIN_BIN)
@@ -48,7 +48,7 @@ build: main build_number
 
 # Recipe for running, just builds and executes the binary
 run: build
-	@echo ""	
+	@echo ""
 	@./$(MAIN_BIN)
 
 # Recipe for cleaning. Removes all objects and binaries

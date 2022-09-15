@@ -1,5 +1,6 @@
 build/target/
 build/build_number
+pw-lcd
 *.exe
 *.rom
 *.bin
