@@ -14,7 +14,7 @@
 
 void decode_ram(uint8_t *lcd_ram, char **term_buf);
 void display(char **term_buf);
-int convert_image(const char *fin, const char *fout);
+int convert_image(const char *fin, const char *fout, int width, int height);
 int view_image(const char* fname);
 void usage();
 
@@ -43,9 +43,10 @@ int main(int argc, char** argv){
     const char* fout = 0;
     const char* fview = 0;
     bool bview_image = false;
+    int width = -1, height = -1;
 
     int c;
-    const char* options = "i:o:vh";
+    const char* options = "i:o:vw:h:";
 
     while((c = getopt(argc, argv, options)) != -1) {
         switch(c) {
@@ -59,8 +60,15 @@ int main(int argc, char** argv){
                 bview_image = true;
                 break;
             case 'h':
+                height = atoi(optarg);
+                break;
+            case 'w':
+                width = atoi(optarg);
+                break;
+            case ':':
+                printf("Error: Option \'%c\' needs an argument\n", optopt);
                 usage();
-                return 0;
+                return EXIT_FAILURE;
             case '?':
                 printf("Unknown option character \'%s\'\n", optopt);
                 usage();
@@ -77,7 +85,7 @@ int main(int argc, char** argv){
     int err = 0;
 
     if(fout != 0) {
-        err = convert_image(fin, fout);
+        err = convert_image(fin, fout, width, height);
         if(err) {
             printf("Error converting image \"%s\" to \"%s\".\n", fin, fout);
             return EXIT_FAILURE;
@@ -111,11 +119,11 @@ Usage: pw-lcd -i <input> [-o <output] [-v]\n\
 
 }
 
-int convert_image(const char *fin, const char *fout) {
+int convert_image(const char *fin, const char *fout, int width, int height) {
 
     uint8_t *bmp_img = malloc(2304);
     uint8_t *pw_img = malloc(2304/4);
-    bmp_to_bytes(fin, bmp_img);
+    bmp_to_bytes(fin, bmp_img, width, height);
 
     convert_8bpp_to_pw(bmp_img, pw_img, 2304, 48, 48);
 
