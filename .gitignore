@@ -1,6 +1,8 @@
 build/target/
 build/build_number
 pw-lcd
+tags
+*.taghl
 *.exe
 *.rom
 *.bin

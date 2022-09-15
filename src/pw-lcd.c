@@ -1,22 +1,15 @@
 #include <stdio.h>
 #include <stdint.h>
-#include <pw-lcd.h>
-#include "ssd1854.h"
-#include "bmp.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <ctype.h>
 
-#define TERMBUF_LENGTH	LCD_WIDTH*LCD_HEIGHT/PIXELS_PER_ROW
+#include "pw-lcd.h"
+#include "ssd1854.h"
+#include "bmp.h"
 
-void decode_ram(uint8_t *lcd_ram, char **term_buf);
-void display(char **term_buf);
-int convert_image(const char *fin, const char *fout, int width, int height);
-int view_image(const char* fname);
-void usage();
 
 
 	/*
@@ -95,7 +88,7 @@ int main(int argc, char** argv){
 
     if(bview_image) {
         fview = (fout == 0)?fin:fout;
-        err = view_image(fview);
+        err = view_image(fview, width, height);
 
         if(err) {
             printf("Error viewing image \"%s\"\n", fview);
@@ -151,17 +144,22 @@ int convert_image(const char *fin, const char *fout, int width, int height) {
 
 }
 
-int view_image(const char* fname) {
+int view_image(const char* fname, int width, int height) {
+
+    if(width <= 0) width = DEFAULT_LCD_WIDTH;
+    if(height <= 0) height = DEFAULT_LCD_HEIGHT;
 
 	// New LCD instance
 	pw_lcd_t lcd;
-	lcd_init(&lcd);
+	lcd_init(&lcd, (size_t)width, (size_t)height);
+    size_t termbuf_length = width*height/PIXELS_PER_ROW;
+
 
 	// Terminal buffer
 	// Size Nx8 to make filling it easier.
 	// Can break into blocks when displaying to fit to screen resolution
-	char **term_buf = (char**)malloc(sizeof(char*) * TERMBUF_LENGTH);
-	for(size_t i = 0; i < TERMBUF_LENGTH; i++)
+	char **term_buf = (char**)malloc(sizeof(char*) * termbuf_length);
+	for(size_t i = 0; i < termbuf_length; i++)
 		term_buf[i] = (char*)malloc(sizeof(char) * PIXELS_PER_ROW);
 
 
@@ -174,11 +172,11 @@ int view_image(const char* fname) {
 	lcd_decode_ram(lcd, term_buf);
 
 	// display term_buf to screen
-	display(term_buf);
+	display(term_buf, termbuf_length, width, height);
 
 
 	// Frees
-	for(size_t i = 0; i < TERMBUF_LENGTH; i++)
+	for(size_t i = 0; i < termbuf_length; i++)
 		free(term_buf[i]);
 	free(term_buf);
 	lcd_free(&lcd);
@@ -188,22 +186,23 @@ int view_image(const char* fname) {
 }
 
 
-void display(char **term_buf) {
-	char* line = malloc(sizeof(char)*2*LCD_WIDTH+4);
+void display(char **term_buf, size_t size, size_t width, size_t height) {
+
+	char* line = malloc(sizeof(char)*2*width+4);
 
 	// b loops over blocks.
 	// One block is a set of 8*LCD_WIDTH pixels
-	for(size_t b = 0; b*LCD_WIDTH < TERMBUF_LENGTH; b++) {
+	for(size_t b = 0; b*width < size; b++) {
 
 		// s loops over the row in each block
 		// One row is 1*LCD_WIDTH pixels
 		for(size_t s = 0; s < PIXELS_PER_ROW; s++) {
-			sprintf(line, "%2d: ", b*PIXELS_PER_ROW+s);
+			sprintf(line, "%2lu: ", b*PIXELS_PER_ROW+s);
 
 			// Append each pixel/character in the row to the line buffer
 			// Double up to make image square
-			for(size_t i = 0; i < LCD_WIDTH; i++) {
-				char c = term_buf[b*LCD_WIDTH+i][s];
+			for(size_t i = 0; i < width; i++) {
+				char c = term_buf[b*width+i][s];
 				sprintf(line, "%s%c%c", line, c, c);
 			}
 			printf("%s\n", line);
@@ -213,6 +212,5 @@ void display(char **term_buf) {
 }
 
 
-void lcd_write(uint8_t** lcd_ram, uint8_t mode, uint8_t value) {
+void lcd_write(uint8_t** lcd_ram, uint8_t mode, uint8_t value) {}
 
-}

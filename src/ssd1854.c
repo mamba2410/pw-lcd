@@ -7,10 +7,14 @@
 /*
  * Makes a new `pw_lcd_t` instance
  */
-void lcd_init(pw_lcd_t *lcd) {
+void lcd_init(pw_lcd_t *lcd, size_t width, size_t height) {
+    size_t capacity = width*height/4;
 	lcd->status = 0x0B; // Magic value in datasheet
 	lcd->status |= LCD_RESET_BIT;
-	lcd->memory = malloc(LCD_RAM_LENGTH);
+	lcd->memory = malloc(capacity);
+    lcd->capacity = capacity;
+    lcd->width = width;
+    lcd->height = height;
 }
 
 
@@ -27,8 +31,14 @@ int lcd_read_file(pw_lcd_t *lcd, const char* fname) {
 
 	struct stat s;
 	if( stat(fname, &s) == -1 ) return -1;
+
+    if(s.st_size > lcd->capacity) {
+        printf("Error: Can't fit file into LCD memory, file too large\n");
+        fclose(fh);
+        return -1;
+    }
+
 	fread(lcd->memory, s.st_size, 1, fh);
-    //printf("%d\n", s.st_size);
 	fclose(fh);
 
 	return 0;
@@ -41,7 +51,7 @@ void lcd_decode_ram(pw_lcd_t lcd, char **term_buf) {
 	uint8_t *lcd_ram = lcd.memory;
 
 	// Loop over ram contents, two bytes at a time
-	for(size_t i = 0; i < LCD_RAM_LENGTH; i+=2) {
+	for(size_t i = 0; i < lcd.capacity; i+=2) {
 
 		// Temp numerical values for one column of pixels
 		uint8_t pixel_value[PIXELS_PER_ROW];
@@ -81,7 +91,7 @@ void lcd_pw_to_bitmap(pw_lcd_t lcd, uint8_t *data, size_t width, size_t height) 
     uint8_t pu, pl, pval;
     size_t pcol, prow, pidx;
 
-    for(size_t i = 0; i < LCD_RAM_LENGTH; i+=2) {
+    for(size_t i = 0; i < lcd.capacity; i+=2) {
         pu = ram[i];
         pl = ram[i+1];
 
