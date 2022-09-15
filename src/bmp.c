@@ -5,7 +5,7 @@
 #include <string.h>
 #include "bmp.h"
 
-int bmp_to_bytes(const char* fname, uint8_t *bytes, int width, int height) {
+size_t bmp_to_bytes(const char* fname, uint8_t *bytes, int *width, int *height) {
 	FILE* fh = fopen(fname, "rb");
     if( fh == NULL) {
         printf("Error opening file\n");
@@ -33,23 +33,28 @@ int bmp_to_bytes(const char* fname, uint8_t *bytes, int width, int height) {
     printf("Bitmap compression format: %d\n", *compression_format);
     printf("Bitmap data size: %d\n", *data_size);
 
-    if(width > 0 && height > 0) {
-        if(*bitmap_width != width || *bitmap_height != height) {
+    if(*width > 0 && *height > 0) {
+        if(*bitmap_width != *width || *bitmap_height != *height) {
             printf("Error: Bitmap size and given size are not the same!\n"
                    "    Bitmap size: %dx%d\n"
                    "    Given size: %dx%d\n",
                    *bitmap_width, *bitmap_height,
-                   width, height);
+                   *width, *height);
             free(buf);
-            return -1;
+            return 0;
         }
+    } else {
+        printf("Setting image size to %dx%d\n", *bitmap_width, *bitmap_height);
+        *width = *bitmap_width;
+        *height = *bitmap_height;
     }
+
 
     memcpy(bytes, &(buf[*data_offset_ptr]), *data_size);
 
     free(buf);
 
-    return 0;
+    return *data_size;
 }
 
 int convert_8bpp_to_pw(uint8_t *data, uint8_t *pw, size_t data_size, size_t width, size_t height) {

@@ -114,7 +114,8 @@ Usage: pw-lcd -i <input> [-o <output] [-v]\n\
     -i <input>  Input file.\n\
     -o <output> Output file\n\
     -v          View image\n\
-    -h          Print this help\n\
+    -w          Image width\n\
+    -h          Image height\n\
 ");
 
 }
@@ -123,9 +124,17 @@ int convert_image(const char *fin, const char *fout, int width, int height) {
 
     uint8_t *bmp_img = malloc(2304);
     uint8_t *pw_img = malloc(2304/4);
-    bmp_to_bytes(fin, bmp_img, width, height);
+    size_t bmp_size = bmp_to_bytes(fin, bmp_img, &width, &height);
 
-    convert_8bpp_to_pw(bmp_img, pw_img, 2304, 48, 48);
+    if(bmp_size == 0) {
+        return -1;
+    }
+
+    int err = convert_8bpp_to_pw(bmp_img, pw_img, bmp_size, width, height);
+
+    if(err) {
+        return -1;
+    }
 
     FILE *fh = fopen(fout, "wb");
     if(!fh) {
