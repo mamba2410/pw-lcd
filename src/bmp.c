@@ -50,9 +50,22 @@ size_t bmp_to_bytes(const char* fname, uint8_t *bytes, int *width, int *height) 
     }
 
 
+    if(*bitmap_depth != 8) {
+        printf("Error converting bitmap: Unsupported bit depth: %d\n", *bitmap_depth);
+        free(buf);
+        return -1;
+    }
+
+    if(*compression_format != 0) {
+        printf("Error converting bitmap: Unsupported compression format: %d\n", *compression_format);
+        free(buf);
+        return -1;
+    }
+
     memcpy(bytes, &(buf[*data_offset_ptr]), *data_size);
 
     free(buf);
+
 
     return *data_size;
 }
