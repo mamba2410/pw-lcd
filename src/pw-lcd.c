@@ -35,7 +35,7 @@ int view_image(char* fname);
 	 */
 int main(int argc, char** argv){
 
-    convert_image("./sad-pokewalker.bmp", "./test_image.bin");
+    //convert_image("./sad-pokewalker.bmp", "./test_image.bin");
     view_image("./test_image.bin");
 
     return 0;
