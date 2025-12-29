@@ -83,7 +83,7 @@ int convert_8bpp_to_pw(uint8_t *data, uint8_t *pw, size_t data_size, size_t widt
 
         size_t pw_index = 2*(bitrow*width + col);
 
-        uint8_t pixval = (data[i] >> 6)&0x03; // Only use the top 2 bits
+        uint8_t pixval = 3-((data[i] >> 6)&0x03); // Only use the top 2 bits
 
         pw[pw_index]   |= ((pixval&2)>>1) << bitpos;
         pw[pw_index+1] |= (pixval&1) << bitpos;
